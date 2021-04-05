@@ -3,9 +3,10 @@ require 'securerandom'
 
 INTERVAL  = 0.1
 COUNT     = 10
+TTL       = 60
 MASTER    = "172.16.0.2:11211"
 REPLICA   = "172.16.0.3:11211"
-OPTIONS   = { expires_in: 60 }
+OPTIONS   = { expires_in: TTL }
 
 $dc = Dalli::Client.new(["#{MASTER}:100", "#{REPLICA}:0"], OPTIONS)
 $m  = Dalli::Client.new(MASTER,  OPTIONS)
