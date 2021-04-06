@@ -7,6 +7,6 @@ SLAVE   = "172.16.0.3:11211"
 m = Memcache.new(MASTER, SLAVE)
 
 m.stats
-m.check(20000, 0.1)
+m.check(20)
 m.stats
 

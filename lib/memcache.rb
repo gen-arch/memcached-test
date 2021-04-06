@@ -7,6 +7,7 @@ TTL       = 60
 class Memcache
   def initialize(master, slave, **options)
     # add hosts
+    @host = Hash.new
     @host[:master] = master
     @host[:slave ] = slave
 
@@ -18,42 +19,38 @@ class Memcache
     @options[:expires_in]  ||= TTL
 
     # get client
-    @client   = con(master, slave)
+    @client   = con
   end
 
   def stats
-    client.each do |k, c|
+    @client.each do |k, c|
       c.reset_stats
-      stats = c.stats
+      _, stat = c.stats.first
       puts "[#{k.to_s}] -------------"
-      puts "items : #{stats["curr_items"]}"
-      puts "bytes : #{stats["bytes"]}"
+      puts "items : #{stat["curr_items"]}"
+      puts "bytes : #{stat["bytes"]}"
     end
   end
 
   def check(count = 10, interval = 0)
-    key = "key#{i}"
     count.times do |i|
+      key = "key#{i}"
       set(key)
-      sleep interval
-    end
-
-    count.times do |i|
       get(key)
+      sleep interval
     end
   end
 
   def set(key)
     v = SecureRandom.alphanumeric(130)
     res = @client[:master].set(key, v)
-    puts "set : #{key} => #{v}" if @verbose
-    sleep @interval
+    puts "[master] set : #{key} => #{v}" if @verbose
   end
 
   def get(key)
     v = SecureRandom.alphanumeric(130)
     res = @client[:slave].get(key)
-    puts "get : #{key} => #{res}" if @verbose
+    puts "[slave ] get : #{key} => #{res}" if @verbose
   end
 
   def recon
